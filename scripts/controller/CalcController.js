@@ -1,28 +1,25 @@
 class CalcController {
 
     constructor() {
-
+        //using _ to refer private
         this._getLastOperation = '';
         this._lastNumber = '';
         this._operation = [];
         this._locale = 'pt-BR';
+        this._currentDate;
         this._displayCalcEl = document.querySelector("#display");
         this._dateEl = document.querySelector("#data");
         this._timeEl = document.querySelector("#hora");
         this._audioOnOff = false; // default audio is off
         this._audio = new Audio('click.mp3'); // Class of Web API, is not native on js
-        //usando _ para referenciar private, pois um objeto nao deveria chamar um atributo privado
+        
         this.initButtonEvents();
-        this._currentDate;
         this.initKeyboard();
         this.initialize();
     }
 
 
     initialize() {
-        //this._displayCalcEl.innerHTML = "test";
-        //this._dateEl.innerHTML = "DATA";
-        //this._timeEl.innerHTML = "HORA";
 
         this.setDisplayDateTime();
 
@@ -85,8 +82,6 @@ class CalcController {
             } else {
                 this.displayCalc = parseFloat(text); // put the clipboard value into display
             }
-            
-            console.log(text);
         });
     }
 
@@ -95,9 +90,7 @@ class CalcController {
 
         document.addEventListener('keyup', e => {
             this.playAudio();
-            console.log(e.key);  
         
-
             switch (e.key) {
 
                 case 'Escape':
@@ -200,7 +193,6 @@ class CalcController {
             setTimeout(() => { // because if array is empty display calc will be 0
                 this.setError();
             }, 1);
-            
         }
     }
 
@@ -227,8 +219,6 @@ class CalcController {
             
             
         }
-        console.log('_lastOperator', this._lastOperator);
-        console.log('_lastNumber', this._lastNumber);
 
         let result = this.getResult(); 
 
@@ -250,7 +240,6 @@ class CalcController {
         
 
         this.setLastNumberToDisplay();
-        console.log(this._operation);
     }
 
     getLastItem(isOperator = true) {
@@ -277,7 +266,6 @@ class CalcController {
 
         let lastNumber = this.getLastItem(false);
 
-        
 
         if (!lastNumber) { // if array is empty
             lastNumber = 0;
@@ -315,8 +303,6 @@ class CalcController {
             }
 
         }
-        
-        console.log(this._operation);
     }
 
     setError() {
@@ -340,8 +326,6 @@ class CalcController {
         }
 
         this.setLastNumberToDisplay();
-
-        console.log("Ponto", lastOperation);
     }
 
     execBtn(value) {
@@ -414,7 +398,6 @@ class CalcController {
             this.addEventListenerAll(btn, 'click drag', e => { // EventListener in all buttons
 
                 let textBtn = btn.className.baseVal.replace("btn-", ""); // bring the buttons class name without "btn-"
-                //console.log(typeof(textBtn));
                 this.execBtn(textBtn);
             });
         
