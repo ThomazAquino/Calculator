@@ -9,12 +9,15 @@ class CalcController {
         this._displayCalcEl = document.querySelector("#display");
         this._dateEl = document.querySelector("#data");
         this._timeEl = document.querySelector("#hora");
+        this._audioOnOff = false; // default audio is off
+        this._audio = new Audio('click.mp3'); // Class of Web API, is not native on js
         //usando _ para referenciar private, pois um objeto nao deveria chamar um atributo privado
         this.initButtonEvents();
         this._currentDate;
         this.initKeyboard();
         this.initialize();
     }
+
 
     initialize() {
         //this._displayCalcEl.innerHTML = "test";
@@ -28,11 +31,70 @@ class CalcController {
         }, 1000);
 
         this.setLastNumberToDisplay();
+        this.pasteFromClipBoard()
+
+        document.querySelectorAll('.btn-ac').forEach(btn => { //there is 2 svg with this class the button and the text
+            
+            btn.addEventListener('dblclick', e => { //listenner the doble click in this buttons
+                
+                this.toggleAudio();
+            });
+        });
+    }
+
+    toggleAudio() { // just reverse the variable to turn on and off
+
+        if (this._audioOnOff) {
+            this._audioOnOff = false;
+        } else {
+            this._audioOnOff = true;
+        }
+    }
+
+    playAudio() {
+
+        if (this._audioOnOff) {
+            this._audio.currentTime = 0; // set the time to 0, for in case of faster clics, need to restar audio and play again
+            this._audio.play();
+        }
+    }
+
+    copyToClipboard() { // I need make this method because the calculator uses SVG instead inputs
+
+        let input = document.createElement('input'); // create a input
+
+        input.value = this.displayCalc; // Set the actual value to the input
+
+        document.body.appendChild(input); // apendchield insert into the body
+
+        input.select(); // select the value of input
+
+        document.execCommand("Copy"); //copy the value of input to operationmal system
+
+        input.remove(); // remove the iinput of the screen after copy the content
+    }
+
+    pasteFromClipBoard() {
+
+        document.addEventListener('paste', e => { // native event named pasted
+          
+            let text = e.clipboardData.getData('Text'); // obtain the data
+
+            if (isNaN(text)) { // check if the value of clipboard is a number
+                return;
+            } else {
+                this.displayCalc = parseFloat(text); // put the clipboard value into display
+            }
+            
+            console.log(text);
+        });
     }
 
     initKeyboard() {
 
+
         document.addEventListener('keyup', e => {
+            this.playAudio();
             console.log(e.key);  
         
 
@@ -75,6 +137,12 @@ class CalcController {
                 case '8':
                 case '9':
                     this.addOperation(parseInt(e.key));
+                    break;
+                
+                case 'c':
+                    if (e.ctrlKey) { // If control was hold
+                        this.copyToClipboard();
+                    }
                     break;
             }
         });
@@ -126,7 +194,14 @@ class CalcController {
     }
 
     getResult() {
-        return eval(this._operation.join("")); // join the array in a string witchout coma, then eval
+        try {
+            return eval(this._operation.join("")); // join the array in a string witchout coma, then eval
+        } catch (e) {
+            setTimeout(() => { // because if array is empty display calc will be 0
+                this.setError();
+            }, 1);
+            
+        }
     }
 
     calc() {
@@ -271,6 +346,8 @@ class CalcController {
 
     execBtn(value) {
 
+        this.playAudio();
+
         switch (value) {
 
             case 'ac':
@@ -377,6 +454,11 @@ class CalcController {
     }
 
     set displayCalc(value) {
+
+        if (value.toString().length > 10 ) { // limits the calc to 10 catacters
+            this.setError();
+            return;
+        }
         this._displayCalcEl.innerHTML = value;
     }
     //currentDate
